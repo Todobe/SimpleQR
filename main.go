@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"github.com/go-toast/toast"
 	"github.com/liyue201/goqr"
@@ -14,9 +15,8 @@ import (
 
 var default_imagefile_name = "C:\\Users\\Dell\\go\\src\\SimpleQR\\icon\\simpleqr.png"
 
-func decode_clipboard() [][]uint8 {
-	fmt.Println("hello world!")
-	imgContext := clipboard.Read(clipboard.FmtImage)
+func decodeImage(imgContext []byte) [][]uint8 {
+
 	img, _, err := image.Decode(bytes.NewReader(imgContext))
 	if err != nil {
 		fmt.Printf("image.Decode error: %v\n", err)
@@ -40,8 +40,8 @@ func decode_clipboard() [][]uint8 {
 	return ret
 }
 
-func main() {
-	qrcodeMessages := decode_clipboard()
+func handleClipboardChange(data []byte) {
+	qrcodeMessages := decodeImage(data)
 	if qrcodeMessages == nil {
 		fmt.Println("noting")
 		return
@@ -52,19 +52,28 @@ func main() {
 	var action []toast.Action
 
 	for _, qrMessage := range qrcodeMessages {
+
+		file, err := os.OpenFile("./tmp.txt", os.O_WRONLY, 0666)
+		if err != nil {
+			panic(err)
+		}
+		file.WriteString(string(qrMessage))
+		file.Close()
+
 		fmt.Println(qrMessage)
 		message = message + string(qrMessage) + "\n"
 		action = append(action, toast.Action{
 			Type:      "protocol",
-			Label:     "点击跳转连接" + string(qrMessage),
+			Label:     "点击跳转" + string(qrMessage),
 			Arguments: string(qrMessage),
 		})
+		action = append(action, toast.Action{
+			Type:      "protocol",
+			Label:     "复制内容",
+			Arguments: "smartqr://C:\\Users\\DELL\\go\\src\\SimpleQR\\smartqr.ps1",
+		})
 	}
-	action = append(action, toast.Action{
-		Type:      "action",
-		Label:     "reply",
-		Arguments: "reply",
-	})
+
 	fmt.Printf(message)
 	notification := toast.Notification{
 		AppID:   "Microsoft.Windows.Shell.RunDialog",
@@ -76,6 +85,13 @@ func main() {
 	err := notification.Push()
 	if err != nil {
 		log.Fatalln(err)
+	}
+}
+
+func main() {
+	ch := clipboard.Watch(context.TODO(), clipboard.FmtImage)
+	for data := range ch {
+		handleClipboardChange(data)
 	}
 
 }
