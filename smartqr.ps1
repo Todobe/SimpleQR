@@ -1,1 +1,0 @@
-Get-Content C:\users\dell\go\src\simpleQR\tmp.txt | clip
