@@ -16,7 +16,8 @@ func onReady() {
 
 	systray.SetIcon(getIcon("icon/smartqr.ico"))
 
-	encodeQR := systray.AddMenuItem("encode QR", "Local time")
+	copyContent := systray.AddMenuItem("copy decoded content", "copy decoded content")
+	encodeQR := systray.AddMenuItem("encode QR", "encode QR")
 	systray.AddSeparator()
 	mQuit := systray.AddMenuItem("Quit", "Quits this app")
 
@@ -25,6 +26,8 @@ func onReady() {
 	go func() {
 		for {
 			select {
+			case <-copyContent.ClickedCh:
+				go smartqr.CopyContent()
 			case <-encodeQR.ClickedCh:
 				go smartqr.EncodeQR()
 			case <-mQuit.ClickedCh:

@@ -17,24 +17,8 @@ import (
 
 var imageFileName string
 var absPath, defaultImageFileName string
-var tempFileName, defaultTempFileName string
-var ps1FileName, defaultPs1FileName string
 
-func constructSmartQRPS1(path string) string {
-	return "Get-Content " + path + " | clip\n"
-}
-
-func writeTempFile(fileName string, content string) {
-	var file *os.File
-
-	file, err := os.Create(fileName)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	file.WriteString(content)
-	file.Close()
-}
+var CacheContent = []byte("Nothing here now.")
 
 func decodeImage(imgContext []byte) [][]uint8 {
 
@@ -68,34 +52,24 @@ func handleClipboardChange(data []byte) {
 		return
 	}
 
-	message := "检测到二维码内容:\n"
+	message := ""
 
 	var action []toast.Action
 
 	for _, qrMessage := range qrcodeMessages {
-
-		writeTempFile(defaultTempFileName, string(qrMessage))
-		writeTempFile(defaultPs1FileName, constructSmartQRPS1(defaultTempFileName))
-
+		CacheContent = qrMessage
 		message = message + string(qrMessage) + "\n"
 		action = append(action, toast.Action{
 			Type:      "protocol",
 			Label:     "点击跳转" + string(qrMessage),
 			Arguments: string(qrMessage),
 		})
-		action = append(action, toast.Action{
-			Type:      "protocol",
-			Label:     "复制内容",
-			Arguments: "smartqr://" + defaultPs1FileName,
-		})
-
-		break
 	}
 
 	fmt.Printf(message)
 	notification := toast.Notification{
-		AppID:   "Microsoft.Windows.Shell.RunDialog",
-		Title:   "SimpleQR",
+		AppID:   "SimpleQR",
+		Title:   "检测到二维码内容：",
 		Message: message,
 		Icon:    defaultImageFileName,
 		Actions: action,
@@ -110,9 +84,9 @@ func EncodeQR() {
 	data := clipboard.Read(clipboard.FmtText)
 	if data == nil {
 		notification := toast.Notification{
-			AppID:   "Microsoft.Windows.Shell.RunDialog",
-			Title:   "SimpleQR",
-			Message: "未检测到有效内容",
+			AppID:   "SimpleQR",
+			Title:   "Encode 失败",
+			Message: "未检测到剪贴板内有效内容",
 		}
 		err := notification.Push()
 		if err != nil {
@@ -136,8 +110,8 @@ func EncodeQR() {
 	png.Encode(file, img)
 
 	notification := toast.Notification{
-		AppID:   "Microsoft.Windows.Shell.RunDialog",
-		Title:   "SimpleQR",
+		AppID:   "SimpleQR",
+		Title:   "Encode成功",
 		Message: "已复制到剪贴板，并保存图片",
 		Actions: []toast.Action{
 			{"protocol", "在文件夹中打开", filepath.Join(absPath, "temp")},
@@ -154,10 +128,12 @@ func EncodeQR() {
 	return
 }
 
+func CopyContent() {
+	clipboard.Write(clipboard.FmtText, CacheContent)
+}
+
 func Run() {
 	imageFileName = "temp/simpleqr.png"
-	tempFileName = "temp/tmp.txt"
-	ps1FileName = "temp/smartqr.ps1"
 	path, err := os.Executable()
 	if err != nil {
 		fmt.Println(err)
@@ -165,8 +141,6 @@ func Run() {
 	absPath = filepath.Dir(path)
 	os.MkdirAll(filepath.Join(absPath, "temp"), os.ModeDir)
 	defaultImageFileName = filepath.Join(absPath, imageFileName)
-	defaultTempFileName = filepath.Join(absPath, tempFileName)
-	defaultPs1FileName = filepath.Join(absPath, ps1FileName)
 
 	ch := clipboard.Watch(context.TODO(), clipboard.FmtImage)
 	for data := range ch {
