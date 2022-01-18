@@ -3,8 +3,10 @@ module SimpleQR
 go 1.14
 
 require (
+	github.com/akavel/rsrc v0.10.2 // indirect
 	github.com/codyguo/xcgui v0.0.0-20170210124306-efb496d231db // indirect
 	github.com/getlantern/systray v1.1.0
+	github.com/go-ole/go-ole v1.2.6
 	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
 	github.com/liyue201/goqr v0.0.0-20200803022322-df443203d4ea
 	github.com/lxn/walk v0.0.0-20210112085537-c389da54e794 // indirect
