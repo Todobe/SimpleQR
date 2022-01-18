@@ -7,5 +7,8 @@ PC端扫描二维码非常不方便，SimpleQR可以识别剪贴板中的内容�
 
 * encode功能： SimpleQR可以将剪贴板内的文字内容进行编码，在托盘图标处点击encode QR生成256*256的简单二维码图片，保存图片，并将图片拷贝到剪贴板中。
 
+### 该版本新增功能
+* 开机自启，在托盘图标处点击Automatically start up at boot，可以设置开机自动启动，当弹出“你要允许未知发布者的此应用对你的设备进行更改吗？”时，选择是。设置成功后，可以在托盘图标出点击Cancel Automatically start up at boot关闭开机自启功能。
+
 ### 请联系我
 有任何问题或意见请联系我：todobe@qq.com
