@@ -65,34 +65,35 @@ func handleClipboardChange(data []byte) {
 			Arguments: string(qrMessage),
 		})
 	}
-
 	fmt.Printf(message)
-	notification := toast.Notification{
-		AppID:   "SimpleQR",
-		Title:   "检测到二维码内容：",
-		Message: message,
-		Icon:    defaultImageFileName,
-		Actions: action,
-	}
-	err := notification.Push()
-	if err != nil {
-		log.Fatalln(err)
-	}
+	clipboard.Write(clipboard.FmtText, CacheContent)
+	//notification := toast.Notification{
+	//	AppID:   "SimpleQR",
+	//	Title:   "检测到二维码内容：",
+	//	Message: message,
+	//	Icon:    defaultImageFileName,
+	//	Actions: action,
+	//}
+	//err := notification.Push()
+	//if err != nil {
+	//	log.Fatalln(err)
+	//}
 }
 
 func EncodeQR() {
 	data := clipboard.Read(clipboard.FmtText)
 	if data == nil {
-		notification := toast.Notification{
-			AppID:   "SimpleQR",
-			Title:   "Encode 失败",
-			Message: "未检测到剪贴板内有效内容",
-		}
-		err := notification.Push()
-		if err != nil {
-			log.Fatalln(err)
-		}
-		return
+		fmt.Println("No valid data in clipboard.")
+		//notification := toast.Notification{
+		//	AppID:   "SimpleQR",
+		//	Title:   "Encode 失败",
+		//	Message: "未检测到剪贴板内有效内容",
+		//}
+		//err := notification.Push()
+		//if err != nil {
+		//	log.Fatalln(err)
+		//}
+		//return
 	}
 
 	imgContext, err := qrencode.Encode(string(data), qrencode.Medium, 256)
@@ -109,22 +110,22 @@ func EncodeQR() {
 	defer file.Close()
 	png.Encode(file, img)
 
-	notification := toast.Notification{
-		AppID:   "SimpleQR",
-		Title:   "Encode成功",
-		Message: "已复制到剪贴板，并保存图片",
-		Actions: []toast.Action{
-			{"protocol", "在文件夹中打开", filepath.Join(absPath, "temp")},
-			{"protocol", "打开图片", defaultImageFileName},
-		},
-	}
+	//notification := toast.Notification{
+	//	AppID:   "SimpleQR",
+	//	Title:   "Encode成功",
+	//	Message: "已复制到剪贴板，并保存图片",
+	//	Actions: []toast.Action{
+	//		{"protocol", "在文件夹中打开", filepath.Join(absPath, "temp")},
+	//		{"protocol", "打开图片", defaultImageFileName},
+	//	},
+	//}
 
 	clipboard.Write(clipboard.FmtImage, imgContext)
 
-	err = notification.Push()
-	if err != nil {
-		log.Fatalln(err)
-	}
+	//err = notification.Push()
+	//if err != nil {
+	//	log.Fatalln(err)
+	//}
 	return
 }
 
