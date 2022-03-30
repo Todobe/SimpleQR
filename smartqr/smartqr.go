@@ -38,9 +38,17 @@ func decodeImage(imgContext []byte) [][]uint8 {
 		ret = append(ret, qrCode.Payload)
 	}
 
-	file, _ := os.Create(defaultImageFileName)
+	file, err := os.Create(defaultImageFileName)
+	if err != nil {
+		fmt.Println("[Error]Create default image file failed!")
+		return ret
+	}
 	defer file.Close()
-	png.Encode(file, img)
+	err = png.Encode(file, img)
+	if err != nil {
+		fmt.Println("[Error]png.Encode failed!")
+		return ret
+	}
 
 	return ret
 }
@@ -48,7 +56,7 @@ func decodeImage(imgContext []byte) [][]uint8 {
 func handleClipboardChange(data []byte) {
 	qrcodeMessages := decodeImage(data)
 	if qrcodeMessages == nil {
-		fmt.Println("noting")
+		fmt.Println("Decode result is empty.")
 		return
 	}
 
@@ -108,8 +116,11 @@ func EncodeQR() {
 	}
 	file, _ := os.Create(defaultImageFileName)
 	defer file.Close()
-	png.Encode(file, img)
-
+	err = png.Encode(file, img)
+	if err != nil {
+		fmt.Println("[Error]png.Encode failed!")
+		return
+	}
 	//notification := toast.Notification{
 	//	AppID:   "SimpleQR",
 	//	Title:   "Encode成功",
@@ -140,7 +151,11 @@ func Run() {
 		fmt.Println(err)
 	}
 	absPath = filepath.Dir(path)
-	os.MkdirAll(filepath.Join(absPath, "temp"), os.ModeDir)
+	err = os.MkdirAll(filepath.Join(absPath, "temp"), os.ModeDir)
+	if err != nil {
+		fmt.Println("[Error]Create temp file failed.")
+		return
+	}
 	defaultImageFileName = filepath.Join(absPath, imageFileName)
 
 	ch := clipboard.Watch(context.TODO(), clipboard.FmtImage)
