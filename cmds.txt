@@ -1,0 +1,10 @@
+#use these command in ./autostartup
+rsrc -manifest nac.manifest -o nac.syso
+go build -o SimpleQRAutoStartUp.exe
+
+#compile command(release)
+go build -o SimpleQR.exe -ldflags "-H=windowsgui" main.go
+
+#compile command (debug)
+go build -o SimpleQR_cmd.exe main.go
+

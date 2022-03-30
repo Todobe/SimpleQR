@@ -93,7 +93,7 @@ func EncodeQR() {
 		//if err != nil {
 		//	log.Fatalln(err)
 		//}
-		//return
+		return
 	}
 
 	imgContext, err := qrencode.Encode(string(data), qrencode.Medium, 256)
